@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Subject Scores — Terminal Report</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            mono: ['"JetBrains Mono"', '"Fira Code"', 'Consolas', 'monospace'],
+          },
+        },
+      },
+    };
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="bg-slate-900 text-slate-200 min-h-screen p-6 font-mono">
+  <div class="w-[90%] max-w-[1600px] mx-auto">
+    <!-- Header -->
+    <header class="no-print mb-8">
+      <h1 class="text-2xl font-semibold text-emerald-400">Subject Scores → Terminal Report</h1>
+      <p class="text-slate-400 text-sm mt-1">Set exam and classwork weights below → Printable report</p>
+    </header>
+
+    <!-- Form: grade system on top, then form -->
+    <section class="no-print mb-8">
+      <div class="flex flex-col gap-6">
+        <!-- Grade system (on top) -->
+        <div class="bg-slate-800/80 rounded-lg border border-slate-600 p-4">
+          <h3 class="text-slate-200 font-semibold text-sm mb-3">Grade system</h3>
+          <ul class="text-slate-400 text-xs space-y-1.5 font-mono flex flex-wrap gap-x-6 gap-y-1">
+            <li><span class="text-amber-400 font-medium">A+</span> 90–100</li>
+            <li><span class="text-amber-400 font-medium">A</span> 80–89</li>
+            <li><span class="text-amber-400 font-medium">A−</span> 75–79</li>
+            <li><span class="text-emerald-400 font-medium">B+</span> 70–74</li>
+            <li><span class="text-emerald-400 font-medium">B</span> 65–69</li>
+            <li><span class="text-emerald-400 font-medium">B−</span> 60–64</li>
+            <li><span class="text-cyan-400 font-medium">C+</span> 55–59</li>
+            <li><span class="text-cyan-400 font-medium">C</span> 50–54</li>
+            <li><span class="text-cyan-400 font-medium">C−</span> 45–49</li>
+            <li><span class="text-orange-400 font-medium">D+</span> 40–44</li>
+            <li><span class="text-orange-400 font-medium">D</span> 35–39</li>
+            <li><span class="text-orange-400 font-medium">D−</span> 30–34</li>
+            <li><span class="text-violet-400 font-medium">E</span> 0–29</li>
+          </ul>
+        </div>
+        <!-- Form (full width below) -->
+        <div class="min-w-0 bg-slate-800/80 rounded-lg border border-slate-600 p-6">
+        <p class="text-slate-400 text-sm mb-3 font-semibold">School information</p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-end mb-4">
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Organization <span class="text-red-400">*</span></label>
+            <input type="text" id="organization" placeholder="e.g. GHANA EDUCATION SERVICE" value="GHANA EDUCATION SERVICE" required
+              class="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" />
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">School name <span class="text-red-400">*</span></label>
+            <input type="text" id="schoolName" placeholder="e.g. Got Matar Secondary School" required
+              class="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" />
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Department <span class="text-red-400">*</span></label>
+            <input type="text" id="department" placeholder="e.g. JUNIOR HIGH SCHOOL" required
+              class="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" />
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 items-end mb-4">
+          <div class="md:col-span-2">
+            <label class="block text-xs text-slate-400 mb-1">Address <span class="text-slate-500">(optional)</span></label>
+            <input type="text" id="schoolAddress" placeholder="e.g. P.O. Box 69, Nyamonye"
+              class="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" />
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 border-t border-slate-600 pt-4">
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">School logo (header)</label>
+            <input type="file" id="schoolLogo" accept="image/*" class="hidden" />
+            <div class="flex items-center gap-3">
+              <button type="button" id="schoolLogoBtn" class="px-3 py-2 bg-slate-600 hover:bg-slate-500 rounded text-sm">Choose image</button>
+              <span id="schoolLogoLabel" class="text-slate-500 text-sm">No image chosen</span>
+            </div>
+            <div id="schoolLogoPreview" class="mt-2 w-16 h-16 rounded-full border-2 border-slate-600 overflow-hidden bg-slate-700 flex items-center justify-center text-slate-500 text-xs hidden">Logo</div>
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Background image (print / PDF)</label>
+            <input type="file" id="backgroundImage" accept="image/*" class="hidden" />
+            <div class="flex items-center gap-3">
+              <button type="button" id="backgroundImageBtn" class="px-3 py-2 bg-slate-600 hover:bg-slate-500 rounded text-sm">Choose image</button>
+              <span id="backgroundImageLabel" class="text-slate-500 text-sm">No image chosen</span>
+            </div>
+            <p class="text-slate-500 text-xs mt-1">Shown faintly behind the report when printing.</p>
+          </div>
+        </div>
+        <p class="text-slate-400 text-sm mb-3 font-semibold mt-4">Student & report details <span class="text-red-400">* required</span></p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-end mb-4">
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Student name <span class="text-red-400">*</span></label>
+            <input type="text" id="studentName" placeholder="e.g. Omuo Kelvine Oduor" required
+              class="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" />
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Year <span class="text-red-400">*</span></label>
+            <input type="text" id="reportYear" placeholder="e.g. 2007" required
+              class="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" />
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Term <span class="text-red-400">*</span></label>
+            <input type="text" id="termSession" placeholder="e.g. Term I" required
+              class="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" />
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Form / Class <span class="text-red-400">*</span></label>
+            <input type="text" id="reportClass" placeholder="e.g. FORM ONE" required
+              class="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" />
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-end mb-4">
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Exam % / Class %</label>
+            <div class="flex gap-2">
+              <input type="number" id="examPercent" min="0" max="100" value="50" class="flex-1 bg-slate-700 border border-slate-600 rounded px-2 py-2 text-sm" />
+              <input type="number" id="classPercent" min="0" max="100" value="50" class="flex-1 bg-slate-700 border border-slate-600 rounded px-2 py-2 text-sm" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Class teacher <span class="text-red-400">*</span></label>
+            <input type="text" id="classTeacher" placeholder="Teacher name" required
+              class="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" />
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Headteacher's comments <span class="text-red-400">*</span></label>
+            <input type="text" id="headteacherRemarks" placeholder="e.g. Keep up this performance." required
+              class="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" />
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Next term begins on <span class="text-red-400">*</span></label>
+            <input type="text" id="reopeningDate" placeholder="e.g. Monday 07/05/2007" required
+              class="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" />
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 items-end mb-4 border border-slate-600 rounded p-3">
+          <p class="text-slate-400 text-sm font-semibold md:col-span-2">Fees record (Total due = Balance + Next term)</p>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Fees balance <span class="text-red-400">*</span></label>
+            <input type="text" id="feesBalance" placeholder="e.g. 4800" required
+              class="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" />
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Fees for next term <span class="text-red-400">*</span></label>
+            <input type="text" id="feesNextTerm" placeholder="e.g. 4200" required
+              class="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" />
+          </div>
+        </div>
+        <div class="border-t border-slate-600 pt-4 mt-4">
+          <p class="text-slate-400 text-sm mb-3">Add subjects — % is calculated from Exam and Classwork (CAT). Grade can be entered or left blank to auto-fill.</p>
+          <div id="subjectRows" class="space-y-3">
+            <div class="subject-row grid grid-cols-1 md:grid-cols-12 gap-2 items-center">
+              <input type="text" placeholder="Subject" class="subject-name col-span-2 md:col-span-2 bg-slate-700 border border-slate-600 rounded px-3 py-2 text-sm" />
+              <input type="number" placeholder="CAT" min="0" max="100" class="classwork-score col-span-1 md:col-span-1 bg-slate-700 border border-slate-600 rounded px-2 py-2 text-sm" />
+              <input type="number" placeholder="Exam" min="0" max="100" class="exam-score col-span-1 md:col-span-1 bg-slate-700 border border-slate-600 rounded px-2 py-2 text-sm" />
+              <span class="total-preview col-span-1 text-amber-400 text-sm">%</span>
+              <input type="text" placeholder="Grade" class="subject-grade col-span-1 md:col-span-1 bg-slate-700 border border-slate-600 rounded px-2 py-2 text-sm" maxlength="3" />
+              <input type="text" placeholder="Remarks" class="subject-remarks col-span-2 md:col-span-2 bg-slate-700 border border-slate-600 rounded px-2 py-2 text-sm" />
+              <button type="button" class="remove-row col-span-1 text-red-400 hover:text-red-300 text-sm" title="Remove">×</button>
+            </div>
+          </div>
+          <button type="button" id="addSubject" class="mt-3 text-emerald-400 hover:text-emerald-300 text-sm">
+            + Add subject
+          </button>
+        </div>
+        <div class="mt-6 flex flex-wrap gap-3">
+          <button type="button" id="generateReport"
+            class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded font-medium text-sm">
+            Generate report
+          </button>
+          <button type="button" id="printReport" class="no-print px-4 py-2 bg-slate-600 hover:bg-slate-500 text-white rounded font-medium text-sm hidden">
+            Print report
+          </button>
+        </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Printable terminal report (GES style) -->
+    <section id="reportSection" class="hidden">
+      <div id="reportContent" class="report-sheet">
+        <!-- Filled by JS -->
+      </div>
+    </section>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
