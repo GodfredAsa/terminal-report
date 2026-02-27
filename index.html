@@ -111,7 +111,7 @@
               class="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" />
           </div>
           <div>
-            <label class="block text-xs text-slate-400 mb-1">Term <span class="text-red-400">*</span></label>
+            <label class="block text-xs text-slate-400 mb-1">Term/Session <span class="text-red-400">*</span></label>
             <input type="text" id="termSession" placeholder="e.g. Term I" required
               class="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" />
           </div>
@@ -122,13 +122,6 @@
           </div>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-end mb-4">
-          <div>
-            <label class="block text-xs text-slate-400 mb-1">Exam % / Class %</label>
-            <div class="flex gap-2">
-              <input type="number" id="examPercent" min="0" max="100" value="50" class="flex-1 bg-slate-700 border border-slate-600 rounded px-2 py-2 text-sm" />
-              <input type="number" id="classPercent" min="0" max="100" value="50" class="flex-1 bg-slate-700 border border-slate-600 rounded px-2 py-2 text-sm" />
-            </div>
-          </div>
           <div>
             <label class="block text-xs text-slate-400 mb-1">Class teacher <span class="text-red-400">*</span></label>
             <input type="text" id="classTeacher" placeholder="Teacher name" required
@@ -161,13 +154,13 @@
           </div>
         </div>
         <div class="border-t border-slate-600 pt-4 mt-4">
-          <p class="text-slate-400 text-sm mb-3">Add subjects — % is calculated from Exam and Classwork (CAT). Grade can be entered or left blank to auto-fill.</p>
+          <p class="text-slate-400 text-sm mb-3">Add subjects — Exam and Class score (sum ≤ 100). Sum is shown; grade and remarks are from the sum and can be edited.</p>
           <div id="subjectRows" class="space-y-3">
             <div class="subject-row grid grid-cols-1 md:grid-cols-12 gap-2 items-center">
               <input type="text" placeholder="Subject" class="subject-name col-span-2 md:col-span-2 bg-slate-700 border border-slate-600 rounded px-3 py-2 text-sm" />
-              <input type="number" placeholder="CAT" min="0" max="100" class="classwork-score col-span-1 md:col-span-1 bg-slate-700 border border-slate-600 rounded px-2 py-2 text-sm" />
               <input type="number" placeholder="Exam" min="0" max="100" class="exam-score col-span-1 md:col-span-1 bg-slate-700 border border-slate-600 rounded px-2 py-2 text-sm" />
-              <span class="total-preview col-span-1 text-amber-400 text-sm">%</span>
+              <input type="number" placeholder="Class" min="0" max="100" class="classwork-score col-span-1 md:col-span-1 bg-slate-700 border border-slate-600 rounded px-2 py-2 text-sm" />
+              <span class="subject-sum col-span-1 text-amber-400 text-sm font-medium" title="Sum (Exam + Class)">—</span>
               <input type="text" placeholder="Grade" class="subject-grade col-span-1 md:col-span-1 bg-slate-700 border border-slate-600 rounded px-2 py-2 text-sm" maxlength="3" />
               <input type="text" placeholder="Remarks" class="subject-remarks col-span-2 md:col-span-2 bg-slate-700 border border-slate-600 rounded px-2 py-2 text-sm" />
               <button type="button" class="remove-row col-span-1 text-red-400 hover:text-red-300 text-sm" title="Remove">×</button>
@@ -182,20 +175,28 @@
             class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded font-medium text-sm">
             Generate report
           </button>
-          <button type="button" id="printReport" class="no-print px-4 py-2 bg-slate-600 hover:bg-slate-500 text-white rounded font-medium text-sm hidden">
-            Print report
-          </button>
         </div>
         </div>
       </div>
     </section>
 
-    <!-- Printable terminal report (GES style) -->
-    <section id="reportSection" class="hidden">
-      <div id="reportContent" class="report-sheet">
-        <!-- Filled by JS -->
+    <!-- Report modal (transparent overlay, blurred background) -->
+    <div id="reportSection" class="report-modal hidden" aria-hidden="true">
+      <div class="report-modal-backdrop no-print"></div>
+      <div class="report-modal-content no-print">
+        <div class="report-modal-actions">
+          <button type="button" id="printReport" class="report-modal-btn report-modal-btn-print">
+            Print report
+          </button>
+          <button type="button" id="closeReportModal" class="report-modal-btn report-modal-btn-close">
+            Close
+          </button>
+        </div>
+        <div id="reportContent" class="report-sheet">
+          <!-- Filled by JS -->
+        </div>
       </div>
-    </section>
+    </div>
   </div>
 
   <script src="app.js"></script>
