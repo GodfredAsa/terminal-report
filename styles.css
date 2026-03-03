@@ -3,17 +3,32 @@
  * Report sheet layout and print styles.
  */
 
+/* Adinkra border wrapper — tiled image around the report */
+.report-border {
+  padding: 14px;
+  background: url('adinkra.jpeg') repeat;
+  background-size: 90px 90px;
+  max-width: 210mm;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.report-border .report-sheet {
+  box-shadow: 0 0 0 1px rgba(26, 61, 26, 0.2);
+}
+
 /* Terminal report form — matching uploaded layout */
 .report-sheet {
   position: relative;
-  max-width: 210mm;
-  margin: 0 auto;
+  max-width: 100%;
+  margin: 0;
   background: #f8faf5;
   color: #1a3d1a;
   border: 2px solid #1a3d1a;
   padding: 0;
   font-family: Georgia, 'Times New Roman', serif;
   font-size: 12px;
+  box-sizing: border-box;
 }
 
 .report-sheet .report-watermark {
@@ -310,6 +325,16 @@
     margin: 0 !important;
   }
 
+  .report-border {
+    padding: 14px !important;
+    background: url('adinkra.jpeg') repeat !important;
+    background-size: 90px 90px !important;
+    max-width: none !important;
+    width: 100% !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
   .report-sheet {
     box-shadow: none !important;
     margin: 0 !important;
@@ -318,5 +343,7 @@
     background: #f8faf5 !important;
     display: block !important;
     visibility: visible !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 }

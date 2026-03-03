@@ -209,9 +209,9 @@ function getReportFormData() {
     reportYear: get('reportYear'),
     termSession: get('termSession'),
     reportClass: get('reportClass'),
+    reportDate: get('reportDate'),
     classTeacher: get('classTeacher'),
     headteacherRemarks: get('headteacherRemarks'),
-    reopeningDate: get('reopeningDate'),
     feesBalance: get('feesBalance'),
     feesNextTerm: get('feesNextTerm'),
     totalDue: String(totalDue),
@@ -220,15 +220,15 @@ function getReportFormData() {
 
 const REQUIRED_FIELDS = [
   'organization', 'schoolName', 'department', 'studentName', 'reportYear', 'termSession',
-  'reportClass', 'classTeacher', 'headteacherRemarks', 'reopeningDate',
+  'reportClass', 'reportDate', 'classTeacher',
   'feesBalance', 'feesNextTerm'
 ];
 
 const FIELD_LABELS = {
   organization: 'Organization', schoolName: 'School name', department: 'Department',
   studentName: 'Student name', reportYear: 'Year', termSession: 'Term',
-  reportClass: 'Form/Class', classTeacher: 'Class teacher',
-  headteacherRemarks: "Headteacher's comments", reopeningDate: 'Next term begins on',
+  reportClass: 'Form/Class', reportDate: 'Report date', classTeacher: 'Class teacher',
+  headteacherRemarks: "Headteacher's comments",
   feesBalance: 'Fees balance', feesNextTerm: 'Fees for next term'
 };
 
@@ -296,7 +296,6 @@ function buildTerminalReport(subjects, form) {
   <div class="report-remarks-section">
     <div class="line"><span class="label">Headteacher's/Deputy Headteacher's Comments:</span><span class="dotted">${escapeHtml(f.headteacherRemarks || '')}</span></div>
     <div class="line"><span class="label">Report seen by Parent/Guardian:</span><span class="dotted"></span> <span class="label">Signature:</span><span class="dotted"></span></div>
-    <div class="line"><span class="label">Next term Begins on:</span><span class="dotted">${escapeHtml(f.reopeningDate || '')}</span> <span class="label">Date:</span><span class="dotted"></span></div>
   </div>
   <div class="report-fees-box">
     <strong>FEES RECORD</strong>
@@ -327,7 +326,31 @@ generateReportBtn.addEventListener('click', () => {
   reportSection.setAttribute('aria-hidden', 'false');
 });
 
-printReportBtn.addEventListener('click', () => window.print());
+/** Sanitize a string for use in a PDF filename (no path chars, no spaces → underscores). */
+function sanitizeFilenamePart(s) {
+  return String(s || '')
+    .trim()
+    .replace(/\s+/g, '_')
+    .replace(/[/\\:*?"<>|]/g, '')
+    .replace(/_+/g, '_')
+    .replace(/^_|_$/g, '') || 'Report';
+}
+
+printReportBtn.addEventListener('click', () => {
+  const form = getReportFormData();
+  const studentName = sanitizeFilenamePart(form.studentName);
+  const reportClass = sanitizeFilenamePart(form.reportClass);
+  const termSession = sanitizeFilenamePart(form.termSession);
+  const date = (form.reportDate && form.reportDate.trim()) ? form.reportDate.trim() : new Date().toISOString().slice(0, 10);
+  const printTitle = `${studentName}_${reportClass}_${termSession}_${date}`;
+  const previousTitle = document.title;
+  document.title = printTitle;
+  window.print();
+  window.onafterprint = () => {
+    document.title = previousTitle;
+    window.onafterprint = null;
+  };
+});
 
 document.getElementById('closeReportModal').addEventListener('click', () => {
   reportSection.classList.add('hidden');
