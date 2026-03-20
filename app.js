@@ -341,6 +341,281 @@ generateReportBtn.addEventListener('click', () => {
   reportSection.setAttribute('aria-hidden', 'false');
 });
 
+// ---- CSV multi-report generation ----
+const csvFileInput = document.getElementById('csvFile');
+const loadCsvBtn = document.getElementById('loadCsvBtn');
+const csvStatus = document.getElementById('csvStatus');
+const csvReportsContainer = document.getElementById('csvReportsContainer');
+
+function parseCsv2D(text) {
+  // Minimal CSV parser: quoted fields may include commas and escaped quotes ("").
+  const rows = [];
+  let row = [];
+  let field = '';
+  let inQuotes = false;
+
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+
+    if (inQuotes) {
+      if (ch === '"') {
+        const next = text[i + 1];
+        if (next === '"') {
+          field += '"';
+          i++;
+        } else {
+          inQuotes = false;
+        }
+      } else {
+        field += ch;
+      }
+      continue;
+    }
+
+    if (ch === '"') {
+      inQuotes = true;
+    } else if (ch === ',') {
+      row.push(field);
+      field = '';
+    } else if (ch === '\n') {
+      row.push(field);
+      field = '';
+      if (row.some((c) => String(c).trim() !== '')) rows.push(row);
+      row = [];
+    } else if (ch === '\r') {
+      // ignore
+    } else {
+      field += ch;
+    }
+  }
+
+  // Flush last line
+  if (field.length > 0 || row.length > 0) {
+    row.push(field);
+    if (row.some((c) => String(c).trim() !== '')) rows.push(row);
+  }
+
+  return rows;
+}
+
+function normalizeCsvNumber(v) {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function normalizeSubjectFromCsv(subjectName, examScore, classworkScore) {
+  const name = String(subjectName || '').trim();
+  if (!name) return null;
+
+  let exam = Math.min(EXAM_MAX, Math.max(0, normalizeCsvNumber(examScore)));
+  let classwork = Math.min(CLASS_MAX, Math.max(0, normalizeCsvNumber(classworkScore)));
+
+  if (exam + classwork > TOTAL_MAX) {
+    classwork = Math.min(CLASS_MAX, Math.max(0, TOTAL_MAX - exam));
+  }
+
+  const total = Math.min(TOTAL_MAX, exam + classwork);
+  if (exam === 0 && classwork === 0) return null;
+
+  const grade = gradeFromPercentage(total);
+  const remarks = gradeToRemark(grade);
+  const points = pointsFromGrade(grade);
+
+  return { name, exam, classwork, total, grade, points, remarks };
+}
+
+function printReportWithData(subjects, formData, reportId) {
+  // Open a dedicated print page so the CSV list page doesn't change.
+  const reportHtml = buildTerminalReport(subjects, formData);
+
+  const w = window.open('', '_blank');
+  if (!w) {
+    alert('Please allow popups to download/print PDFs.');
+    return;
+  }
+
+  const department = formData && formData.department ? String(formData.department) : '';
+  const studentName = formData && formData.studentName ? String(formData.studentName) : '';
+  const termSession = formData && formData.termSession ? String(formData.termSession) : '';
+  const safeReportId = sanitizeFilenamePart(reportId);
+  const safeDepartment = sanitizeFilenamePart(department);
+  const safeStudentName = sanitizeFilenamePart(studentName);
+  // Keep TERM exactly as in CSV (including spaces/case), but strip illegal filename characters.
+  const safeTerm = sanitizeFilenamePartPreserveSpaces(termSession);
+  const printTitle = `${safeReportId}-${safeDepartment}-${safeStudentName}-${safeTerm}`;
+
+  const bgUrlEscaped = String(backgroundImageDataUrl || '')
+    .replace(/\\/g, '\\\\')
+    .replace(/'/g, '\\\'');
+
+  w.document.open();
+  w.document.write(`<!doctype html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${printTitle}</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="report-border">
+    <div class="report-sheet">${reportHtml}</div>
+  </div>
+  <script>
+    window.onload = function () {
+      setTimeout(function () {
+        var el = document.querySelector('.report-watermark:not(.no-bg-image)');
+        if (el) el.style.backgroundImage = "url('${bgUrlEscaped}')"; 
+        window.print();
+      }, 50);
+    };
+  </script>
+</body>
+</html>`);
+  w.document.close();
+}
+
+function sanitizeFilenamePartPreserveSpaces(s) {
+  return String(s || '')
+    .trim()
+    // Remove characters disallowed in filenames, but do not replace spaces.
+    .replace(/[/\\:*?"<>|]/g, '') || 'Report';
+}
+
+async function handleCsvLoad() {
+  if (!csvFileInput || !loadCsvBtn || !csvReportsContainer || !csvStatus) return;
+
+  if (!csvFileInput.files || csvFileInput.files.length === 0) {
+    csvStatus.textContent = 'Please choose a CSV file first.';
+    return;
+  }
+
+  const file = csvFileInput.files[0];
+  csvStatus.textContent = `Reading ${file.name}...`;
+  csvReportsContainer.innerHTML = '';
+
+  const text = await file.text();
+  const rows2D = parseCsv2D(text);
+  if (rows2D.length < 2) {
+    csvStatus.textContent = 'CSV is empty or missing rows.';
+    return;
+  }
+
+  const headerRow = rows2D[0];
+  const headers = headerRow.map((h) => String(h).trim().toLowerCase());
+
+  const rowObjects = rows2D.slice(1).map((cells) => {
+    const obj = {};
+    headers.forEach((h, idx) => {
+      obj[h] = cells[idx] ?? '';
+    });
+    return obj;
+  });
+
+  // Group rows by reportId (one reportId => multiple subject rows => one printable report)
+  const reportsById = new Map();
+  const order = [];
+
+  for (const r of rowObjects) {
+    const reportId = String(r.reportid || '').trim();
+    if (!reportId) continue;
+
+    if (!reportsById.has(reportId)) {
+      const feesBalance = normalizeCsvNumber(r.feesbalance);
+      const feesNextTerm = normalizeCsvNumber(r.feesnextterm);
+      reportsById.set(reportId, {
+        meta: {
+          department: String(r.department || ''),
+          schoolAddress: String(r.schooladdress || ''),
+          studentName: String(r.studentname || ''),
+          reportClass: String(r.reportclass || ''),
+          termSession: String(r.termsession || ''),
+          reportYear: String(r.reportyear || ''),
+          reportDate: String(r.reportdate || ''),
+          attendance: String(r.attendance || ''),
+          expectedAttendance: String(r.expectedattendance || ''),
+          vacationDate: String(r.vacationdate || ''),
+          classTeacher: String(r.classteacher || ''),
+          classTeacherRemarks: String(r.classteacherremarks || ''),
+          headteacherRemarks: String(r.headteacherremarks || ''),
+          feesBalance: String(feesBalance),
+          feesNextTerm: String(feesNextTerm),
+          totalDue: String(feesBalance + feesNextTerm),
+        },
+        subjects: [],
+      });
+      order.push(reportId);
+    }
+
+    const group = reportsById.get(reportId);
+    const subject = normalizeSubjectFromCsv(r.subjectname, r.examscore, r.classworkscore);
+    if (subject) group.subjects.push(subject);
+  }
+
+  const grouped = order
+    .map((id) => ({ id, group: reportsById.get(id) }))
+    .filter((x) => x.group && x.group.subjects.length > 0);
+
+  if (grouped.length === 0) {
+    csvStatus.textContent = 'No valid reports found (check reportId and subject scores).';
+    return;
+  }
+
+  csvStatus.textContent = `Found ${grouped.length} report(s).`;
+  csvReportsContainer.innerHTML = '';
+
+  for (const { id, group } of grouped) {
+    const meta = group.meta;
+    const studentLabel = meta.studentName || 'Student';
+    const reportLabel = [meta.reportClass, meta.termSession].filter(Boolean).join(' ');
+    const subjectsCount = group.subjects.length;
+
+    const details = document.createElement('details');
+    details.className = 'bg-slate-800/50 border border-slate-600/60 rounded-lg p-3';
+    details.open = false;
+    details.innerHTML = `
+      <summary class="cursor-pointer list-none">
+        <div class="min-w-0">
+          <div class="text-slate-200 font-semibold text-sm truncate">${escapeHtmlForUi(studentLabel)}</div>
+          <div class="text-slate-400 text-xs truncate">${escapeHtmlForUi(reportLabel || 'Report')} • ${subjectsCount} subject(s)</div>
+        </div>
+      </summary>
+      <div class="mt-3 flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between">
+        <div class="text-slate-400 text-xs">
+          Department: ${escapeHtmlForUi(meta.department || '—')} • Date: ${escapeHtmlForUi(meta.reportDate || '—')}
+        </div>
+        <button type="button" class="csv-print-btn px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-medium text-sm transition">
+          Print / Download PDF
+        </button>
+      </div>
+    `;
+
+    const btn = details.querySelector('.csv-print-btn');
+    btn.addEventListener('click', () => {
+      printReportWithData(group.subjects, meta, id);
+    });
+
+    csvReportsContainer.appendChild(details);
+  }
+}
+
+function escapeHtmlForUi(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+if (loadCsvBtn) {
+  loadCsvBtn.addEventListener('click', () => {
+    handleCsvLoad().catch((err) => {
+      console.error(err);
+      if (csvStatus) csvStatus.textContent = 'Failed to load CSV. Check formatting and headers.';
+    });
+  });
+}
+
 /** Sanitize a string for use in a PDF filename (no path chars, no spaces → underscores). */
 function sanitizeFilenamePart(s) {
   return String(s || '')
