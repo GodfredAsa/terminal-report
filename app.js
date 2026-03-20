@@ -10,44 +10,9 @@ const printReportBtn = document.getElementById('printReport');
 const reportSection = document.getElementById('reportSection');
 const reportContent = document.getElementById('reportContent');
 
-let schoolLogoDataUrl = null;
-let backgroundImageDataUrl = null;
-
-function setupImageUpload(inputId, buttonId, labelId, previewId, onDataUrl) {
-  const input = document.getElementById(inputId);
-  const btn = document.getElementById(buttonId);
-  const label = document.getElementById(labelId);
-  const preview = previewId ? document.getElementById(previewId) : null;
-  if (!input || !btn) return;
-  btn.addEventListener('click', () => input.click());
-  input.addEventListener('change', () => {
-    const file = input.files && input.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      const dataUrl = reader.result;
-      onDataUrl(dataUrl);
-      if (label) label.textContent = file.name;
-      if (preview && dataUrl) {
-        preview.classList.remove('hidden');
-        const img = preview.querySelector('img');
-        if (img) img.src = dataUrl;
-        else {
-          const im = document.createElement('img');
-          im.src = dataUrl;
-          im.alt = 'Preview';
-          im.className = 'w-full h-full object-cover';
-          preview.innerHTML = '';
-          preview.appendChild(im);
-        }
-      }
-    };
-    reader.readAsDataURL(file);
-  });
-}
-
-setupImageUpload('schoolLogo', 'schoolLogoBtn', 'schoolLogoLabel', 'schoolLogoPreview', (url) => { schoolLogoDataUrl = url; });
-setupImageUpload('backgroundImage', 'backgroundImageBtn', 'backgroundImageLabel', null, (url) => { backgroundImageDataUrl = url; });
+// Static assets (no uploads in UI).
+const schoolLogoDataUrl = 'dynamic-logo.jpeg';
+const backgroundImageDataUrl = 'adinkra-bnw.webp';
 
 function getSubjectRowHtml() {
   const div = document.createElement('div');
@@ -248,8 +213,10 @@ function getReportFormData() {
     reportClass: get('reportClass'),
     reportDate: get('reportDate'),
     attendance: get('attendance'),
+    expectedAttendance: get('expectedAttendance'),
     vacationDate: get('vacationDate'),
     classTeacher: get('classTeacher'),
+    classTeacherRemarks: get('classTeacherRemarks'),
     headteacherRemarks: get('headteacherRemarks'),
     feesBalance: get('feesBalance'),
     feesNextTerm: get('feesNextTerm'),
@@ -258,13 +225,13 @@ function getReportFormData() {
 }
 
 const REQUIRED_FIELDS = [
-  'organization', 'schoolName', 'department', 'studentName', 'reportYear', 'termSession',
+  'department', 'studentName', 'reportYear', 'termSession',
   'reportClass', 'reportDate', 'classTeacher',
   'feesBalance', 'feesNextTerm'
 ];
 
 const FIELD_LABELS = {
-  organization: 'Organization', schoolName: 'School name', department: 'Department',
+  department: 'Department',
   studentName: 'Student name', reportYear: 'Year', termSession: 'Term',
   reportClass: 'Form/Class', reportDate: 'Report date', classTeacher: 'Class teacher',
   headteacherRemarks: "Headteacher's comments",
@@ -289,7 +256,8 @@ function buildTerminalReport(subjects, form) {
     : '<span>Logo</span>';
   const watermarkClass = backgroundImageDataUrl ? 'report-watermark' : 'report-watermark no-bg-image';
 
-  const schoolName = escapeHtml(f.schoolName || '');
+  // Static school name (no user input).
+  const schoolName = escapeHtml('DYNAMIC DIVINE ACADEMY');
   const schoolAddress = f.schoolAddress ? escapeHtml(f.schoolAddress) : '';
 
   const subjectRowsHtml = subjects.map((s) =>
@@ -297,6 +265,7 @@ function buildTerminalReport(subjects, form) {
   ).join('');
 
   const attendanceText = f.attendance ? escapeHtml(f.attendance) : '';
+  const expectedAttendanceText = f.expectedAttendance ? escapeHtml(f.expectedAttendance) : '';
   const vacationDateText = f.vacationDate ? escapeHtml(f.vacationDate) : '';
 
   return `
@@ -317,6 +286,7 @@ function buildTerminalReport(subjects, form) {
     <span><strong>Name</strong> ${escapeHtml(f.studentName || '')}</span>
     <span><strong>${escapeHtml(f.reportClass || 'FORM')}</strong></span>
     <span><strong>Attendance</strong> ${attendanceText}</span>
+    <span><strong>Expected Attendance</strong> ${expectedAttendanceText}</span>
     <span><strong>Vacation</strong> ${vacationDateText}</span>
   </div>
   <table class="report-table">
@@ -338,6 +308,7 @@ function buildTerminalReport(subjects, form) {
     A+: 90–100 &nbsp; A: 80–89 &nbsp; A−: 75–79 &nbsp; B+: 70–74 &nbsp; B: 65–69 &nbsp; B−: 60–64 &nbsp; C+: 55–59 &nbsp; C: 50–54 &nbsp; C−: 45–49 &nbsp; D+: 40–44 &nbsp; D: 35–39 &nbsp; D−: 30–34 &nbsp; E: 0–29
   </div>
   <div class="report-remarks-section">
+    <div class="line"><span class="label">Class Teacher's Comments:</span><span class="dotted">${escapeHtml(f.classTeacherRemarks || '')}</span></div>
     <div class="line"><span class="label">Headteacher's/Deputy Headteacher's Comments:</span><span class="dotted">${escapeHtml(f.headteacherRemarks || '')}</span></div>
     <div class="line"><span class="label">Report seen by Parent/Guardian:</span><span class="dotted"></span> <span class="label">Signature:</span><span class="dotted"></span></div>
   </div>

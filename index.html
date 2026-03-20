@@ -56,47 +56,20 @@
         <div class="min-w-0 bg-slate-800/80 rounded-xl border border-slate-600/80 p-6 md:p-8 shadow-sm space-y-8">
           <!-- School information -->
           <div>
-            <h2 class="text-emerald-400/90 font-semibold text-sm uppercase tracking-wider mb-4 pb-2 border-b border-slate-600/60">School information</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div>
-                <label class="block text-xs text-slate-400 mb-1.5">Organization <span class="text-red-400">*</span></label>
-                <input type="text" id="organization" placeholder="e.g. GHANA EDUCATION SERVICE" value="GHANA EDUCATION SERVICE" required
-                  class="input-field w-full bg-slate-700/80 border border-slate-600 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500/60 focus:border-emerald-500 outline-none transition" />
-              </div>
-              <div>
-                <label class="block text-xs text-slate-400 mb-1.5">School name <span class="text-red-400">*</span></label>
-                <input type="text" id="schoolName" placeholder="e.g. Got Matar Secondary School" required
-                  class="input-field w-full bg-slate-700/80 border border-slate-600 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500/60 focus:border-emerald-500 outline-none transition" />
-              </div>
-              <div>
+            <div class="flex flex-wrap items-baseline justify-between gap-2 mb-4 pb-2 border-b border-slate-600/60">
+              <h2 class="text-emerald-400/90 font-semibold text-sm uppercase tracking-wider">School information</h2>
+              <div class="text-slate-200 text-sm font-semibold">DYNAMIC DIVINE ACADEMY</div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="md:col-span-1">
                 <label class="block text-xs text-slate-400 mb-1.5">Department <span class="text-red-400">*</span></label>
                 <input type="text" id="department" placeholder="e.g. JUNIOR HIGH SCHOOL" required
                   class="input-field w-full bg-slate-700/80 border border-slate-600 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500/60 focus:border-emerald-500 outline-none transition" />
               </div>
-              <div class="sm:col-span-2 lg:col-span-3">
+              <div class="md:col-span-1">
                 <label class="block text-xs text-slate-400 mb-1.5">Address <span class="text-slate-500">(optional)</span></label>
                 <input type="text" id="schoolAddress" placeholder="e.g. P.O. Box 69, Nyamonye"
                   class="input-field w-full bg-slate-700/80 border border-slate-600 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500/60 focus:border-emerald-500 outline-none transition" />
-              </div>
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-              <div>
-                <label class="block text-xs text-slate-400 mb-1.5">School logo (header)</label>
-                <input type="file" id="schoolLogo" accept="image/*" class="hidden" />
-                <div class="flex items-center gap-3">
-                  <button type="button" id="schoolLogoBtn" class="px-3 py-2 bg-slate-600 hover:bg-slate-500 rounded-lg text-sm transition">Choose image</button>
-                  <span id="schoolLogoLabel" class="text-slate-500 text-sm">No image chosen</span>
-                </div>
-                <div id="schoolLogoPreview" class="mt-2 w-16 h-16 rounded-full border-2 border-slate-600 overflow-hidden bg-slate-700 flex items-center justify-center text-slate-500 text-xs hidden">Logo</div>
-              </div>
-              <div>
-                <label class="block text-xs text-slate-400 mb-1.5">Background image (print / PDF)</label>
-                <input type="file" id="backgroundImage" accept="image/*" class="hidden" />
-                <div class="flex items-center gap-3">
-                  <button type="button" id="backgroundImageBtn" class="px-3 py-2 bg-slate-600 hover:bg-slate-500 rounded-lg text-sm transition">Choose image</button>
-                  <span id="backgroundImageLabel" class="text-slate-500 text-sm">No image chosen</span>
-                </div>
-                <p class="text-slate-500 text-xs mt-1">Shown faintly behind the report when printing.</p>
               </div>
             </div>
           </div>
@@ -137,6 +110,12 @@
                   class="input-field w-full bg-slate-700/80 border border-slate-600 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500/60 focus:border-emerald-500 outline-none transition" />
               </div>
               <div>
+                <label class="block text-xs text-slate-400 mb-1.5">Expected Attendance <span class="text-slate-500">(optional)</span></label>
+                <input type="number" id="expectedAttendance" placeholder="e.g. 95"
+                  min="0" max="100" step="1"
+                  class="input-field w-full bg-slate-700/80 border border-slate-600 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500/60 focus:border-emerald-500 outline-none transition" />
+              </div>
+              <div>
                 <label class="block text-xs text-slate-400 mb-1.5">Vacation date <span class="text-slate-500">(optional)</span></label>
                 <input type="date" id="vacationDate"
                   class="input-field w-full bg-slate-700/80 border border-slate-600 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500/60 focus:border-emerald-500 outline-none transition" />
@@ -145,6 +124,11 @@
                 <label class="block text-xs text-slate-400 mb-1.5">Class teacher <span class="text-red-400">*</span></label>
                 <input type="text" id="classTeacher" placeholder="Teacher name" required
                   class="input-field w-full bg-slate-700/80 border border-slate-600 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500/60 focus:border-emerald-500 outline-none transition" />
+              </div>
+              <div class="sm:col-span-2 lg:col-span-3">
+                <label class="block text-xs text-slate-400 mb-1.5">Class teacher's comments <span class="text-slate-500">(optional)</span></label>
+                <textarea id="classTeacherRemarks" placeholder="e.g. Keep up this performance." rows="2"
+                  class="input-field w-full bg-slate-700/80 border border-slate-600 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500/60 focus:border-emerald-500 outline-none transition resize-y min-h-[4rem]"></textarea>
               </div>
             </div>
             <div class="mt-4">
