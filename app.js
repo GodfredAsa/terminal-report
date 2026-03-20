@@ -54,8 +54,8 @@ function getSubjectRowHtml() {
   div.className = 'subject-row grid grid-cols-1 md:grid-cols-12 gap-2 items-center';
   div.innerHTML = `
     <input type="text" placeholder="Subject" class="subject-name col-span-2 md:col-span-2 bg-slate-700 border border-slate-600 rounded px-3 py-2 text-sm" />
-    <input type="number" placeholder="Exam" min="0" max="100" class="exam-score col-span-1 md:col-span-1 bg-slate-700 border border-slate-600 rounded px-2 py-2 text-sm" />
-    <input type="number" placeholder="Class" min="0" max="100" class="classwork-score col-span-1 md:col-span-1 bg-slate-700 border border-slate-600 rounded px-2 py-2 text-sm" />
+    <input type="number" placeholder="Exam" min="0" max="60" class="exam-score col-span-1 md:col-span-1 bg-slate-700 border border-slate-600 rounded px-2 py-2 text-sm" />
+    <input type="number" placeholder="Class" min="0" max="40" class="classwork-score col-span-1 md:col-span-1 bg-slate-700 border border-slate-600 rounded px-2 py-2 text-sm" />
     <span class="subject-sum col-span-1 text-amber-400 text-sm font-medium" title="Sum (Exam + Class)">—</span>
     <input type="text" placeholder="Grade" class="subject-grade col-span-1 md:col-span-1 bg-slate-700 border border-slate-600 rounded px-2 py-2 text-sm" maxlength="3" />
     <input type="text" placeholder="Remarks" class="subject-remarks col-span-2 md:col-span-2 bg-slate-700 border border-slate-600 rounded px-2 py-2 text-sm" />
@@ -80,6 +80,12 @@ const GRADING_SCALE = [
   { min: 30, grade: 'D-' },
   { min: 0, grade: 'E' },
 ];
+
+// Subject scoring rules: Exam contributes 60%, Classwork contributes 40%.
+// Total used for grade calculation is always in the 0–100 range.
+const EXAM_MAX = 60;
+const CLASS_MAX = 40;
+const TOTAL_MAX = EXAM_MAX + CLASS_MAX;
 
 function gradeFromPercentage(pct) {
   const score = Math.min(100, Math.max(0, Number(pct) || 0));
@@ -122,7 +128,7 @@ function updateSumDisplay(row) {
   const exam = parseFloat(row.querySelector('.exam-score').value) || 0;
   const classwork = parseFloat(row.querySelector('.classwork-score').value) || 0;
   const sumEl = row.querySelector('.subject-sum');
-  if (sumEl) sumEl.textContent = (exam > 0 || classwork > 0) ? Math.min(100, exam + classwork) : '—';
+  if (sumEl) sumEl.textContent = (exam > 0 || classwork > 0) ? Math.min(TOTAL_MAX, exam + classwork) : '—';
 }
 
 function updateGradeAndRemarksFromScores(row) {
@@ -138,7 +144,7 @@ function updateGradeAndRemarksFromScores(row) {
     if (remarksInput) remarksInput.value = '';
     return;
   }
-  const total = Math.min(100, exam + classwork);
+  const total = Math.min(TOTAL_MAX, exam + classwork);
   const grade = gradeFromPercentage(total);
   const remark = gradeToRemark(grade);
   if (gradeInput) gradeInput.value = grade;
@@ -148,11 +154,33 @@ function updateGradeAndRemarksFromScores(row) {
 function enforceExamClassSum(row, changedField) {
   const examInput = row.querySelector('.exam-score');
   const classInput = row.querySelector('.classwork-score');
-  let exam = parseFloat(examInput.value) || 0;
-  let classwork = parseFloat(classInput.value) || 0;
-  if (exam + classwork > 100) {
-    if (changedField === 'exam') examInput.value = Math.min(exam, 100 - classwork);
-    else classInput.value = Math.min(classwork, 100 - exam);
+
+  // Only correct when values exceed limits; don't force empty fields into "0".
+  const examRaw = examInput.value;
+  const classRaw = classInput.value;
+  let exam = examRaw === '' ? null : Number(examRaw);
+  let classwork = classRaw === '' ? null : Number(classRaw);
+
+  if (exam !== null && !Number.isNaN(exam) && exam > EXAM_MAX) {
+    exam = EXAM_MAX;
+    examInput.value = String(exam);
+  }
+  if (classwork !== null && !Number.isNaN(classwork) && classwork > CLASS_MAX) {
+    classwork = CLASS_MAX;
+    classInput.value = String(classwork);
+  }
+
+  const examNum = (exam === null || Number.isNaN(exam)) ? 0 : exam;
+  const classNum = (classwork === null || Number.isNaN(classwork)) ? 0 : classwork;
+
+  if (examNum + classNum > TOTAL_MAX) {
+    if (changedField === 'exam') {
+      const allowedExam = Math.min(EXAM_MAX, TOTAL_MAX - classNum);
+      examInput.value = String(allowedExam);
+    } else {
+      const allowedClass = Math.min(CLASS_MAX, TOTAL_MAX - examNum);
+      classInput.value = String(allowedClass);
+    }
   }
 }
 
@@ -182,8 +210,17 @@ function getSubjectsData() {
     const name = row.querySelector('.subject-name').value.trim() || 'Subject';
     let exam = parseFloat(row.querySelector('.exam-score').value) || 0;
     let classwork = parseFloat(row.querySelector('.classwork-score').value) || 0;
-    if (exam + classwork > 100) classwork = Math.max(0, 100 - exam);
-    const total = Math.min(100, exam + classwork);
+
+    // Enforce max contribution per field.
+    exam = Math.min(EXAM_MAX, Math.max(0, exam));
+    classwork = Math.min(CLASS_MAX, Math.max(0, classwork));
+
+    // Re-correct if the combined total is somehow above 100.
+    if (exam + classwork > TOTAL_MAX) {
+      classwork = Math.min(CLASS_MAX, Math.max(0, TOTAL_MAX - exam));
+    }
+
+    const total = Math.min(TOTAL_MAX, exam + classwork);
     const gradeInput = row.querySelector('.subject-grade');
     const remarksInput = row.querySelector('.subject-remarks');
     let grade = (gradeInput && gradeInput.value.trim()) || '';
@@ -210,6 +247,8 @@ function getReportFormData() {
     termSession: get('termSession'),
     reportClass: get('reportClass'),
     reportDate: get('reportDate'),
+    attendance: get('attendance'),
+    vacationDate: get('vacationDate'),
     classTeacher: get('classTeacher'),
     headteacherRemarks: get('headteacherRemarks'),
     feesBalance: get('feesBalance'),
@@ -257,6 +296,9 @@ function buildTerminalReport(subjects, form) {
     `<tr><td class="col-subject">${escapeHtml(s.name)}</td><td>${s.exam}</td><td>${s.classwork}</td><td>${s.total}</td><td>${escapeHtml(s.grade)}</td><td>${s.points !== '' ? s.points : ''}</td><td>${escapeHtml(s.remarks)}</td></tr>`
   ).join('');
 
+  const attendanceText = f.attendance ? escapeHtml(f.attendance) : '';
+  const vacationDateText = f.vacationDate ? escapeHtml(f.vacationDate) : '';
+
   return `
 <div class="${watermarkClass}" aria-hidden="true"></div>
 <div class="report-inner">
@@ -274,6 +316,8 @@ function buildTerminalReport(subjects, form) {
   <div class="report-student-line">
     <span><strong>Name</strong> ${escapeHtml(f.studentName || '')}</span>
     <span><strong>${escapeHtml(f.reportClass || 'FORM')}</strong></span>
+    <span><strong>Attendance</strong> ${attendanceText}</span>
+    <span><strong>Vacation</strong> ${vacationDateText}</span>
   </div>
   <table class="report-table">
     <thead>
