@@ -347,6 +347,78 @@ const loadCsvBtn = document.getElementById('loadCsvBtn');
 const csvStatus = document.getElementById('csvStatus');
 const csvReportsContainer = document.getElementById('csvReportsContainer');
 
+// Template buttons / guide modal
+const dataTemplateBtn = document.getElementById('dataTemplateBtn');
+const templateGuideBtn = document.getElementById('templateGuideBtn');
+const templateGuideModal = document.getElementById('templateGuideModal');
+const closeTemplateGuideBtn = document.getElementById('closeTemplateGuideBtn');
+const templateGuideText = document.getElementById('templateGuideText');
+
+const CSV_TEMPLATE_HEADER = 'reportId,department,schoolAddress,studentName,reportClass,termSession,reportYear,reportDate,attendance,expectedAttendance,vacationDate,classTeacher,classTeacherRemarks,headteacherRemarks,feesBalance,feesNextTerm,subjectName,examScore,classworkScore';
+
+const TEMPLATE_GUIDE_TEXT = `CSV format (long format)
+One CSV row = one subject line.
+Rows are grouped by "reportId" to generate one report per student.
+
+Required CSV headers:
+reportId, department, schoolAddress, studentName, reportClass, termSession, reportYear, reportDate,
+attendance, expectedAttendance, vacationDate,
+classTeacher, classTeacherRemarks, headteacherRemarks,
+feesBalance, feesNextTerm,
+subjectName, examScore, classworkScore
+
+Notes:
+- grade and remarks are system-generated from examScore + classworkScore (so DO NOT include them).
+- examScore max = 60, classworkScore max = 40.
+- If examScore + classworkScore exceed 100, the app auto-corrects within limits.`;
+
+function openTemplateGuide() {
+  if (!templateGuideModal) return;
+  if (templateGuideText) templateGuideText.textContent = TEMPLATE_GUIDE_TEXT;
+  templateGuideModal.classList.remove('hidden');
+  templateGuideModal.setAttribute('aria-hidden', 'false');
+}
+
+function closeTemplateGuide() {
+  if (!templateGuideModal) return;
+  templateGuideModal.classList.add('hidden');
+  templateGuideModal.setAttribute('aria-hidden', 'true');
+}
+
+if (dataTemplateBtn) {
+  dataTemplateBtn.addEventListener('click', () => {
+    // Download a header-only CSV (no sample student/subject rows).
+    const blob = new Blob([`${CSV_TEMPLATE_HEADER}\n`], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'sample_reports.csv';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    URL.revokeObjectURL(url);
+  });
+}
+
+if (templateGuideBtn) {
+  templateGuideBtn.addEventListener('click', () => {
+    const url = 'https://drive.google.com/file/d/1JroikxoTRDFZbWC2wySQuHSv4rsEgBgZ/view?usp=sharing';
+    window.open(url, '_blank', 'noopener,noreferrer');
+  });
+}
+
+if (closeTemplateGuideBtn) {
+  closeTemplateGuideBtn.addEventListener('click', () => closeTemplateGuide());
+}
+
+if (templateGuideModal) {
+  templateGuideModal.addEventListener('click', (e) => {
+    if (e.target === templateGuideModal) closeTemplateGuide();
+  });
+}
+
 function parseCsv2D(text) {
   // Minimal CSV parser: quoted fields may include commas and escaped quotes ("").
   const rows = [];
