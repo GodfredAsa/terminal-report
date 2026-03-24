@@ -316,7 +316,7 @@ function buildTerminalReport(subjects, form) {
     <strong>FEES RECORD</strong>
     <div>Fees Balance: ${escapeHtml(f.feesBalance || '')}</div>
     <div>Fees for next term: ${escapeHtml(f.feesNextTerm || '')}</div>
-    <div>Total due on opening day Kshs: ${escapeHtml(f.totalDue || '')}</div>
+    <div>Total due on opening day GHS: ${escapeHtml(f.totalDue || '')}</div>
   </div>
 </div>
   `.trim();
@@ -404,7 +404,7 @@ if (dataTemplateBtn) {
 
 if (templateGuideBtn) {
   templateGuideBtn.addEventListener('click', () => {
-    const url = 'https://drive.google.com/file/d/1JroikxoTRDFZbWC2wySQuHSv4rsEgBgZ/view?usp=sharing';
+    const url = 'https://drive.google.com/file/d/1RmZEYyvTA7-4lWnPP3TJwfuNKKbkgxQ6/view?usp=sharing';
     window.open(url, '_blank', 'noopener,noreferrer');
   });
 }
