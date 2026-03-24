@@ -11,7 +11,7 @@ const reportSection = document.getElementById('reportSection');
 const reportContent = document.getElementById('reportContent');
 
 // Static assets (no uploads in UI).
-const schoolLogoDataUrl = 'dynamic-logo.jpeg';
+const schoolLogoDataUrl = './dynamic-logo.jpeg';
 const backgroundImageDataUrl = 'adinkra-bnw.webp';
 
 function getSubjectRowHtml() {
