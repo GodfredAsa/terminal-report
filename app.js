@@ -11,7 +11,8 @@ const reportSection = document.getElementById('reportSection');
 const reportContent = document.getElementById('reportContent');
 
 // Static assets (no uploads in UI).
-const schoolLogoDataUrl = './dynamic-logo.jpeg';
+const schoolLogoDataUrl = 'https://drive.google.com/file/d/1Tb3qC1QWWIWyttZIvTWfu67-hUM6ufpc/view?usp=sharing';
+const schoolLogoFallbackUrl = 'dynamic-logo.jpeg';
 const backgroundImageDataUrl = 'adinkra-bnw.webp';
 
 function getSubjectRowHtml() {
@@ -251,8 +252,10 @@ function buildTerminalReport(subjects, form) {
   const f = form || getReportFormData();
   const escapeHtml = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
-  const logoHtml = schoolLogoDataUrl
-    ? `<img src="${schoolLogoDataUrl.replace(/"/g, '&quot;')}" alt="School logo" />`
+  const logoSrc = schoolLogoDataUrl || schoolLogoFallbackUrl;
+  const logoFallbackSrc = schoolLogoFallbackUrl;
+  const logoHtml = logoSrc
+    ? `<img src="${logoSrc.replace(/"/g, '&quot;')}" alt="School logo" onerror="this.onerror=null;this.src='${logoFallbackSrc.replace(/'/g, "\\'")}';" />`
     : '<span>Logo</span>';
   const watermarkClass = backgroundImageDataUrl ? 'report-watermark' : 'report-watermark no-bg-image';
 
