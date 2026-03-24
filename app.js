@@ -11,8 +11,9 @@ const reportSection = document.getElementById('reportSection');
 const reportContent = document.getElementById('reportContent');
 
 // Static assets (no uploads in UI).
-const schoolLogoDataUrl = 'https://drive.google.com/file/d/1Tb3qC1QWWIWyttZIvTWfu67-hUM6ufpc/view?usp=sharing';
-const schoolLogoFallbackUrl = 'dynamic-logo.jpeg';
+// Resolve local logo against current base URL so it works on localhost and GitHub Pages.
+const schoolLogoDataUrl = new URL('dynamic-logo.jpeg', document.baseURI).href;
+const schoolLogoFallbackUrl = schoolLogoDataUrl;
 const backgroundImageDataUrl = 'adinkra-bnw.webp';
 
 function getSubjectRowHtml() {
