@@ -519,6 +519,9 @@ function printReportWithData(subjects, formData, reportId) {
   const bgUrlEscaped = String(backgroundImageDataUrl || '')
     .replace(/\\/g, '\\\\')
     .replace(/'/g, '\\\'');
+  const baseHrefEscaped = String(document.baseURI || window.location.href)
+    .replace(/\\/g, '\\\\')
+    .replace(/"/g, '&quot;');
 
   w.document.open();
   w.document.write(`<!doctype html>
@@ -526,6 +529,7 @@ function printReportWithData(subjects, formData, reportId) {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <base href="${baseHrefEscaped}" />
   <title>${printTitle}</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
