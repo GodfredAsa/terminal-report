@@ -27,7 +27,49 @@
     <header class="no-print mb-8">
       <h1 class="text-2xl font-semibold text-emerald-400">Subject Scores → Terminal Report</h1>
       <p class="text-slate-400 text-sm mt-1">Set exam and classwork weights below → Printable report</p>
+      <div class="mt-4 flex flex-col sm:flex-row gap-3">
+        <button type="button" id="dataTemplateBtn"
+          class="px-5 py-2.5 bg-slate-700/60 hover:bg-slate-700 text-slate-100 border border-slate-600 rounded-lg font-medium text-sm shadow-sm transition">
+          Download Data Template
+        </button>
+        <button type="button" id="templateGuideBtn"
+          class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-medium text-sm shadow-sm transition">
+          View Template Guide
+        </button>
+      </div>
     </header>
+
+    <!-- CSV upload: generate multiple reports -->
+    <section class="no-print mb-8">
+      <div class="bg-slate-800/60 rounded-xl border border-emerald-500/20 p-4 shadow-sm">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-3 pb-2 border-b border-slate-600/60">
+          <h2 class="text-emerald-400/90 font-semibold text-sm uppercase tracking-wider">Multi Report Section</h2>
+          <div class="text-slate-400 text-xs">Upload CSV → generate & print each student</div>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-3 items-start">
+          <div class="flex-1 w-full">
+            <label class="block text-xs text-slate-400 mb-1.5">CSV file (one row per subject)</label>
+            <input type="file" id="csvFile" accept=".csv,text/csv"
+              class="block w-full text-sm text-slate-300
+              file:mr-4 file:py-2 file:px-4
+              file:rounded-lg file:border-0
+              file:text-sm file:font-semibold
+              file:bg-emerald-600 file:text-white
+              hover:file:bg-emerald-500
+              " />
+          </div>
+          <button type="button" id="loadCsvBtn"
+            class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-medium text-sm shadow-sm transition">
+            Load & Preview
+          </button>
+        </div>
+        <p class="text-slate-500 text-xs mt-3">
+          Use a “long format” CSV: each student report is grouped by `reportId`, with multiple subject rows per student.
+        </p>
+        <div id="csvStatus" class="text-slate-400 text-xs mt-2"></div>
+        <div id="csvReportsContainer" class="mt-4 space-y-3"></div>
+      </div>
+    </section>
 
     <!-- Form: grade system on top, then form -->
     <section class="no-print mb-8">
@@ -56,47 +98,20 @@
         <div class="min-w-0 bg-slate-800/80 rounded-xl border border-slate-600/80 p-6 md:p-8 shadow-sm space-y-8">
           <!-- School information -->
           <div>
-            <h2 class="text-emerald-400/90 font-semibold text-sm uppercase tracking-wider mb-4 pb-2 border-b border-slate-600/60">School information</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div>
-                <label class="block text-xs text-slate-400 mb-1.5">Organization <span class="text-red-400">*</span></label>
-                <input type="text" id="organization" placeholder="e.g. GHANA EDUCATION SERVICE" value="GHANA EDUCATION SERVICE" required
-                  class="input-field w-full bg-slate-700/80 border border-slate-600 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500/60 focus:border-emerald-500 outline-none transition" />
-              </div>
-              <div>
-                <label class="block text-xs text-slate-400 mb-1.5">School name <span class="text-red-400">*</span></label>
-                <input type="text" id="schoolName" placeholder="e.g. Got Matar Secondary School" required
-                  class="input-field w-full bg-slate-700/80 border border-slate-600 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500/60 focus:border-emerald-500 outline-none transition" />
-              </div>
-              <div>
+            <div class="flex flex-wrap items-baseline justify-between gap-2 mb-4 pb-2 border-b border-slate-600/60">
+              <h2 class="text-emerald-400/90 font-semibold text-sm uppercase tracking-wider">School information</h2>
+              <div class="text-slate-200 text-sm font-semibold">DYNAMIC DIVINE ACADEMY</div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="md:col-span-1">
                 <label class="block text-xs text-slate-400 mb-1.5">Department <span class="text-red-400">*</span></label>
                 <input type="text" id="department" placeholder="e.g. JUNIOR HIGH SCHOOL" required
                   class="input-field w-full bg-slate-700/80 border border-slate-600 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500/60 focus:border-emerald-500 outline-none transition" />
               </div>
-              <div class="sm:col-span-2 lg:col-span-3">
+              <div class="md:col-span-1">
                 <label class="block text-xs text-slate-400 mb-1.5">Address <span class="text-slate-500">(optional)</span></label>
                 <input type="text" id="schoolAddress" placeholder="e.g. P.O. Box 69, Nyamonye"
                   class="input-field w-full bg-slate-700/80 border border-slate-600 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500/60 focus:border-emerald-500 outline-none transition" />
-              </div>
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-              <div>
-                <label class="block text-xs text-slate-400 mb-1.5">School logo (header)</label>
-                <input type="file" id="schoolLogo" accept="image/*" class="hidden" />
-                <div class="flex items-center gap-3">
-                  <button type="button" id="schoolLogoBtn" class="px-3 py-2 bg-slate-600 hover:bg-slate-500 rounded-lg text-sm transition">Choose image</button>
-                  <span id="schoolLogoLabel" class="text-slate-500 text-sm">No image chosen</span>
-                </div>
-                <div id="schoolLogoPreview" class="mt-2 w-16 h-16 rounded-full border-2 border-slate-600 overflow-hidden bg-slate-700 flex items-center justify-center text-slate-500 text-xs hidden">Logo</div>
-              </div>
-              <div>
-                <label class="block text-xs text-slate-400 mb-1.5">Background image (print / PDF)</label>
-                <input type="file" id="backgroundImage" accept="image/*" class="hidden" />
-                <div class="flex items-center gap-3">
-                  <button type="button" id="backgroundImageBtn" class="px-3 py-2 bg-slate-600 hover:bg-slate-500 rounded-lg text-sm transition">Choose image</button>
-                  <span id="backgroundImageLabel" class="text-slate-500 text-sm">No image chosen</span>
-                </div>
-                <p class="text-slate-500 text-xs mt-1">Shown faintly behind the report when printing.</p>
               </div>
             </div>
           </div>
@@ -131,9 +146,31 @@
                   class="input-field w-full bg-slate-700/80 border border-slate-600 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500/60 focus:border-emerald-500 outline-none transition" />
               </div>
               <div>
+                <label class="block text-xs text-slate-400 mb-1.5">Attendance <span class="text-slate-500">(optional)</span></label>
+                <input type="number" id="attendance" placeholder="e.g. 90"
+                  min="0" max="100" step="1"
+                  class="input-field w-full bg-slate-700/80 border border-slate-600 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500/60 focus:border-emerald-500 outline-none transition" />
+              </div>
+              <div>
+                <label class="block text-xs text-slate-400 mb-1.5">Expected Attendance <span class="text-slate-500">(optional)</span></label>
+                <input type="number" id="expectedAttendance" placeholder="e.g. 95"
+                  min="0" max="100" step="1"
+                  class="input-field w-full bg-slate-700/80 border border-slate-600 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500/60 focus:border-emerald-500 outline-none transition" />
+              </div>
+              <div>
+                <label class="block text-xs text-slate-400 mb-1.5">Vacation date <span class="text-slate-500">(optional)</span></label>
+                <input type="date" id="vacationDate"
+                  class="input-field w-full bg-slate-700/80 border border-slate-600 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500/60 focus:border-emerald-500 outline-none transition" />
+              </div>
+              <div>
                 <label class="block text-xs text-slate-400 mb-1.5">Class teacher <span class="text-red-400">*</span></label>
                 <input type="text" id="classTeacher" placeholder="Teacher name" required
                   class="input-field w-full bg-slate-700/80 border border-slate-600 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500/60 focus:border-emerald-500 outline-none transition" />
+              </div>
+              <div class="sm:col-span-2 lg:col-span-3">
+                <label class="block text-xs text-slate-400 mb-1.5">Class teacher's comments <span class="text-slate-500">(optional)</span></label>
+                <textarea id="classTeacherRemarks" placeholder="e.g. Keep up this performance." rows="2"
+                  class="input-field w-full bg-slate-700/80 border border-slate-600 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500/60 focus:border-emerald-500 outline-none transition resize-y min-h-[4rem]"></textarea>
               </div>
             </div>
             <div class="mt-4">
@@ -164,12 +201,12 @@
           <!-- Subjects -->
           <div>
             <h2 class="text-emerald-400/90 font-semibold text-sm uppercase tracking-wider mb-2 pb-2 border-b border-slate-600/60">Subjects</h2>
-            <p class="text-slate-400 text-xs mb-4">Exam + Class score (sum ≤ 100). Grade and remarks can be edited.</p>
+            <p class="text-slate-400 text-xs mb-4">Exam score (max 60) + Class score (max 40) = Total (100). Grade and remarks can be edited.</p>
             <div id="subjectRows" class="space-y-3">
               <div class="subject-row grid grid-cols-1 md:grid-cols-12 gap-2 items-center">
                 <input type="text" placeholder="Subject" class="subject-name col-span-2 md:col-span-2 bg-slate-700/80 border border-slate-600 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/60 outline-none" />
-                <input type="number" placeholder="Exam" min="0" max="100" class="exam-score col-span-1 md:col-span-1 bg-slate-700/80 border border-slate-600 rounded-lg px-2 py-2 text-sm focus:ring-2 focus:ring-emerald-500/60 outline-none" />
-                <input type="number" placeholder="Class" min="0" max="100" class="classwork-score col-span-1 md:col-span-1 bg-slate-700/80 border border-slate-600 rounded-lg px-2 py-2 text-sm focus:ring-2 focus:ring-emerald-500/60 outline-none" />
+                <input type="number" placeholder="Exam" min="0" max="60" class="exam-score col-span-1 md:col-span-1 bg-slate-700/80 border border-slate-600 rounded-lg px-2 py-2 text-sm focus:ring-2 focus:ring-emerald-500/60 outline-none" />
+                <input type="number" placeholder="Class" min="0" max="40" class="classwork-score col-span-1 md:col-span-1 bg-slate-700/80 border border-slate-600 rounded-lg px-2 py-2 text-sm focus:ring-2 focus:ring-emerald-500/60 outline-none" />
                 <span class="subject-sum col-span-1 text-amber-400 text-sm font-medium" title="Sum (Exam + Class)">—</span>
                 <input type="text" placeholder="Grade" class="subject-grade col-span-1 md:col-span-1 bg-slate-700/80 border border-slate-600 rounded-lg px-2 py-2 text-sm focus:ring-2 focus:ring-emerald-500/60 outline-none" maxlength="3" />
                 <input type="text" placeholder="Remarks" class="subject-remarks col-span-2 md:col-span-2 bg-slate-700/80 border border-slate-600 rounded-lg px-2 py-2 text-sm focus:ring-2 focus:ring-emerald-500/60 outline-none" />
@@ -208,6 +245,24 @@
             <!-- Filled by JS -->
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- Template guide modal -->
+    <div id="templateGuideModal" class="fixed inset-0 z-60 hidden items-center justify-center no-print" aria-hidden="true">
+      <div class="absolute inset-0 bg-slate-900/70"></div>
+      <div class="relative w-full max-w-2xl bg-slate-800/95 border border-slate-600 rounded-xl p-4 shadow-lg">
+        <div class="flex items-start justify-between gap-3 mb-3">
+          <div>
+            <h3 class="text-emerald-400 font-semibold text-sm">CSV Template Guide</h3>
+            <p class="text-slate-300 text-xs mt-1">Upload CSV → click a report → Print/Save as PDF</p>
+          </div>
+          <button type="button" id="closeTemplateGuideBtn"
+            class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-sm font-medium transition">
+            Close
+          </button>
+        </div>
+        <pre id="templateGuideText" class="text-xs text-slate-200 whitespace-pre-wrap font-mono"></pre>
       </div>
     </div>
   </div>
